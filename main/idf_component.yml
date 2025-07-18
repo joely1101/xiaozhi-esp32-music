@@ -1,5 +1,9 @@
 ## IDF Component Manager Manifest File
 dependencies:
+  joely1101-xiaozhi-fonts:
+    git: https://github.com/joely1101/xiaozhi-fonts.git
+    version: "*" 
+
   waveshare/esp_lcd_sh8601: 1.0.2
   espressif/esp_lcd_ili9341: ==1.2.0
   espressif/esp_lcd_gc9a01: ==2.0.1
@@ -15,7 +19,7 @@ dependencies:
   78/esp-wifi-connect: ~2.4.2
   78/esp-opus-encoder: ~2.3.3
   78/esp-ml307: ~2.2.1
-  78/xiaozhi-fonts: ~1.3.2
+  #78/xiaozhi-fonts: ~1.3.2
   espressif/led_strip: ^2.5.5
   espressif/esp_codec_dev: ~1.3.2
   espressif/esp-sr: ~2.1.1
