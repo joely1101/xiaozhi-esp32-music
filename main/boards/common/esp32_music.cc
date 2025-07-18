@@ -1274,7 +1274,7 @@ void Esp32Music::UpdateLyricDisplay(int64_t current_time_ms) {
             }
             
             // 显示歌词
-            display->SetChatMessage("lyric", lyric_text.c_str());
+            display->SetChatMessage("assistant", lyric_text.c_str());
             
             ESP_LOGD(TAG, "Lyric update at %lldms: %s", 
                     current_time_ms, 

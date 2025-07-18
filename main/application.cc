@@ -33,7 +33,7 @@
 #include <arpa/inet.h>
 
 #define TAG "Application"
-extern char *zh_s2t_string(const char *input);
+
 
 static const char* const STATE_STRINGS[] = {
     "unknown",
@@ -531,38 +531,20 @@ void Application::Start() {
             } else if (strcmp(state->valuestring, "sentence_start") == 0) {
                 auto text = cJSON_GetObjectItem(root, "text");
                 if (cJSON_IsString(text)) {
-                    std::string message_copy;
-                    char *zhstring = zh_s2t_string(text->valuestring);
-                    if (zhstring == NULL) {
-                        message_copy = text->valuestring;
-                    }
-                    else{
-                        message_copy = zhstring;
-                        free(zhstring);
-                    }
-                    ESP_LOGI(TAG, ">> %s", message_copy.c_str());
-                    Schedule([this, display, message = std::move(message_copy)]() {
+                    ESP_LOGI(TAG, "<< %s", text->valuestring);
+                    Schedule([this, display, message = std::string(text->valuestring)]() {
                         display->SetChatMessage("assistant", message.c_str());
                     });
                 }
-            } 
+            }
         } else if (strcmp(type->valuestring, "stt") == 0) {
             auto text = cJSON_GetObjectItem(root, "text");
             if (cJSON_IsString(text)) {
-                std::string message_copy;
-                char *zhstring = zh_s2t_string(text->valuestring);
-                if (zhstring == NULL) {
-                    message_copy = text->valuestring;
-                }
-                else{
-                    message_copy = zhstring;
-                    free(zhstring);
-                }
-                ESP_LOGI(TAG, ">> %s ", message_copy.c_str());
-                Schedule([this, display, message = std::move(message_copy)]() {
+                ESP_LOGI(TAG, ">> %s", text->valuestring);
+                Schedule([this, display, message = std::string(text->valuestring)]() {
                     display->SetChatMessage("user", message.c_str());
                 });
-            } 
+            }
         } else if (strcmp(type->valuestring, "llm") == 0) {
             auto emotion = cJSON_GetObjectItem(root, "emotion");
             if (cJSON_IsString(emotion)) {
