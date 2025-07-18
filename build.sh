@@ -2,6 +2,7 @@
 #source /opt/esp/entrypoint.sh
 #
 if [ ! -f sdkconfig ];then
+    cp sdkconfig.defaults.esp32s3CubeWifi sdkconfig.defaults
     idf.py menuconfig
 fi
 idf.py build
