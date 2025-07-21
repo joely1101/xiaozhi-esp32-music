@@ -105,6 +105,7 @@ void McpServer::AddCommonTools() {
 
     auto music = board.GetMusic();
     if (music) {
+#if 0        
         AddTool("self.music.play_song",
             "播放指定的歌曲。当用户要求播放音乐时使用此工具，会自动获取歌曲详情并开始流式播放。\n"
             "参数:\n"
@@ -116,12 +117,77 @@ void McpServer::AddCommonTools() {
             }),
             [music](const PropertyList& properties) -> ReturnValue {
                 auto song_name = properties["song_name"].value<std::string>();
-                if (!music->Download(song_name)) {
+                if (!music->Download(song_name,0)) {
                     return "{\"success\": false, \"message\": \"获取音乐资源失败\"}";
                 }
                 auto download_result = music->GetDownloadResult();
                 ESP_LOGD(TAG, "Music details result: %s", download_result.c_str());
                 return true;
+            });
+
+        AddTool("self.music.play_story",
+            "用戶希望聽故事的時候使用此工具,指定播放故事的名稱,会自动获取歌曲详情并开始流式播放。\n"
+            "参数:\n"
+            "  `story_name`: 要播放的故事mp3名称。\n"
+            "返回:\n"
+            "  播放状态信息，不需确认，立刻播放故事mp3。",
+            PropertyList({
+                Property("story_name", kPropertyTypeString)
+            }),
+            [music](const PropertyList& properties) -> ReturnValue {
+                auto story_name = properties["story_name"].value<std::string>();
+                if (!music->Download(story_name,1)) {
+                    ESP_LOGE(TAG, "Failed to download story: %s", story_name.c_str());
+                    return "{\"success\": false, \"message\": \"获取故事资源失败\"}";
+                }
+                auto download_result = music->GetDownloadResult();
+                ESP_LOGD(TAG, "Music details result: %s", download_result.c_str());
+                return true;
+            });
+#endif            
+        AddTool("self.music.play_audio",
+            "當獲取到一個可以撥放音檔的url的時候使用此工具,播放名稱。\n"
+            "参数:\n"
+            "  `title`: 要播放的名称(可選)。\n"
+            "  `audio_url`: 要播放的檔案url(必須)。\n"
+            "  `lyric_url`: 要播放的音檔的歌詞 lyric(可選)。\n"
+            "返回:\n"
+            "  播放状态信息，不需确认，立刻播放。",
+            PropertyList({
+                Property("title", kPropertyTypeString),
+                Property("audio_url", kPropertyTypeString),
+                Property("lyric_url", kPropertyTypeString)
+            }),
+            //ESP_LOGI(TAG, "self.music.play_audio title: %s  url: %s lyric: %s", title.c_str(),audio_url.c_str(),lyric_url.c_str());
+            [music](const PropertyList& properties) -> ReturnValue {
+                auto title = properties["title"].value<std::string>();
+                auto audio_url = properties["audio_url"].value<std::string>();
+                auto lyric_url = properties["lyric_url"].value<std::string>();
+                ESP_LOGI(TAG, "Playing audio: %s  url: %s lyric: %s", title.c_str(),audio_url.c_str(),lyric_url.c_str());
+                if (!music->PlayUrl(title,audio_url,lyric_url)) {
+                    ESP_LOGE(TAG, "Failed to play audio: %s  url: %s", title.c_str(),audio_url.c_str());
+                    return "{\"success\": false, \"message\": \"获取音檔资源失败\"}";
+                }
+                return "{\"success\": true, \"message\": \"即將播放" + title + "\"}";
+            });
+        AddTool("self.music.lyric_onoff",
+            "使用者如果想開關歌詞是否螢幕上顯示的時候使用此工具,輸入on或off來開關歌詞顯示。\n"
+            "参数:\n"
+            "  `enable`: on or off\n"
+            "返回:\n"
+            "  成功或失敗",
+            PropertyList({
+                Property("enable", kPropertyTypeString),
+            }),
+            //ESP_LOGI(TAG, "self.music.play_audio title: %s  url: %s lyric: %s", title.c_str(),audio_url.c_str(),lyric_url.c_str());
+            [music](const PropertyList& properties) -> ReturnValue {
+                auto onoff = properties["enable"].value<std::string>();
+                if (onoff != "on" && onoff != "off") {
+                    return "{\"success\": false, \"message\": \"輸入on或off來開關歌詞顯示\"}";
+                }
+                ESP_LOGI(TAG, "lyric enable %s ==> %s", music->lyric_enabled_?"on":"off",onoff.c_str());
+                music->lyric_enabled_ = onoff == "on";
+                return "{\"success\": true, \"message\": \"歌詞顯示" + onoff + "\"}";
             });
     }
 

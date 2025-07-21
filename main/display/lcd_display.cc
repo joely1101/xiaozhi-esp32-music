@@ -418,10 +418,13 @@ void LcdDisplay::SetupUI() {
 #else
 #define  MAX_MESSAGES 20
 #endif
-extern char *zh_s2t_string(const char *input);
+extern char *zh_s2t_string(char *input);
 void LcdDisplay::SetChatMessage(const char* role, const char* org_content) {
     DisplayLockGuard lock(this);
-    char* content=zh_s2t_string(org_content);
+    char* content = const_cast<char*>(org_content);
+    if (strcmp(role, "user") == 0) {
+        content=zh_s2t_string(const_cast<char*>(org_content));
+    }
     if (content_ == nullptr) {
         return;
     }
@@ -476,9 +479,6 @@ void LcdDisplay::SetChatMessage(const char* role, const char* org_content) {
     
     // 计算文本实际宽度
     lv_coord_t text_width = lv_txt_get_width(content, strlen(content), fonts_.text_font, 0);
-    if (content) {
-        free(content);
-    }
     // 计算气泡宽度
     lv_coord_t max_width = LV_HOR_RES * 85 / 100 - 16;  // 屏幕宽度的85%
     lv_coord_t min_width = 20;  

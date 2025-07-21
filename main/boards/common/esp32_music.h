@@ -80,8 +80,8 @@ private:
 public:
     Esp32Music();
     ~Esp32Music();
-
-    virtual bool Download(const std::string& song_name) override;
+    virtual bool PlayUrl(const std::string& title,const std::string& url,const std::string& lyric_url) override;
+    virtual bool Download(const std::string& song_name,int type) override;
     virtual bool Play() override;
     virtual bool Stop() override;
     virtual std::string GetDownloadResult() override;
@@ -91,6 +91,7 @@ public:
     virtual bool StopStreaming() override;  // 停止流式播放
     virtual size_t GetBufferSize() const override { return buffer_size_; }
     virtual bool IsDownloading() const override { return is_downloading_; }
+    
 };
 
 #endif // ESP32_MUSIC_H
